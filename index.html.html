@@ -1,0 +1,751 @@
+<!--
+Ultra Fitness — Premium Demo (Gym + Supplements)
+Save as: index.html
+
+README / Quick notes:
+- To set WhatsApp contact: change setWhatsApp('919812345678') near bottom of this file.
+- To set Google Maps: replace MAP_EMBED_SRC variable value with actual Google Maps embed URL (iframe src).
+- Hero video is a royalty-free Pexels/cover video; replace with client video if available.
+- Images use Unsplash sample URLs; replace with actual gym/store photos from client's Instagram for best results.
+- Run locally: Use VS Code Live Server (recommended).
+- Deploy: GitHub -> Vercel / Netlify. This single file is deploy-ready.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ultra Fitness — Gym & Supplements (Premium Demo)</title>
+  <meta name="description" content="Ultra Fitness — Gym & Supplements. Join, train and shop premium supplements. Local gym in Kanpur — demo site." />
+  <meta property="og:title" content="Ultra Fitness — Gym & Supplements" />
+  <meta property="og:description" content="Premium demo site showcasing gym memberships, trainers, facilities and supplement store." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1558611848-73f7eb4001d5?q=80&w=1200&auto=format&fit=crop" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💪</text></svg>">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Rubik:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ufTeal: '#0d9488',
+            ufAmber: '#f59e0b',
+            ufDark: '#0f172a'
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            display: ['Rubik', 'Inter']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom premium styles */
+    :root {
+      --glass-bg: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.08);
+    }
+    html { scroll-behavior: smooth; }
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .card-3d {
+      transform: perspective(800px);
+      transition: transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
+    }
+    .card-3d:hover { transform: perspective(800px) rotateX(4deg) translateY(-6px); box-shadow: 0 20px 40px rgba(2,6,23,0.25); }
+    .btn-primary { background: linear-gradient(90deg,var(--tw-gradient-stops)); }
+    .counter { font-variant-numeric: tabular-nums; }
+    .lightbox-bg { background: rgba(2,6,23,0.85); }
+    .mini-badge { background: linear-gradient(90deg,#06b6d4,#f59e0b); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:700; }
+    /* simple modal */
+    .modal { display:none; }
+    .modal.show { display:flex; }
+    /* small helper */
+    .hide { display:none !important; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-sans">
+
+  <!-- TOP NAV -->
+  <header class="fixed w-full z-50">
+    <div class="backdrop-blur-sm bg-white/40 border-b border-white/10">
+      <div class="max-w-6xl mx-auto flex items-center justify-between p-4">
+        <a href="#home" class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-ufTeal to-ufAmber text-white font-display text-xl shadow">UF</div>
+          <div>
+            <div class="font-display font-semibold text-lg leading-4">Ultra Fitness</div>
+            <div class="text-xs text-gray-600">Gym & Supplements</div>
+          </div>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-6 text-sm">
+          <a href="#about" class="hover:text-ufTeal">About</a>
+          <a href="#facilities" class="hover:text-ufTeal">Facilities</a>
+          <a href="#trainers" class="hover:text-ufTeal">Trainers</a>
+          <a href="#plans" class="hover:text-ufTeal">Plans</a>
+          <a href="#supplements" class="hover:text-ufTeal">Supplements</a>
+          <a href="#gallery" class="hover:text-ufTeal">Gallery</a>
+          <a href="#contact" class="hover:text-ufTeal">Contact</a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <a id="whatsappHeader" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full text-white bg-gradient-to-r from-ufTeal to-ufAmber shadow" href="#" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5..."/></svg>
+            Contact
+          </a>
+
+          <button id="menuToggle" class="md:hidden p-2 rounded bg-white/30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-ufDark" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- mobile nav -->
+      <div id="mobileNav" class="hidden md:hidden border-t border-white/5">
+        <div class="max-w-6xl mx-auto p-4 flex flex-col gap-3 text-sm bg-white/5">
+          <a href="#about">About</a>
+          <a href="#facilities">Facilities</a>
+          <a href="#trainers">Trainers</a>
+          <a href="#plans">Plans</a>
+          <a href="#supplements">Supplements</a>
+          <a href="#gallery">Gallery</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO (video background + overlay) -->
+  <main class="pt-24">
+    <section id="home" class="relative">
+      <!-- video background -->
+      <div class="absolute inset-0 overflow-hidden">
+        <video autoplay muted loop playsinline class="w-full h-full object-cover filter brightness-75">
+          <!-- royalty-free sample from Pexels; replace with client's video for final -->
+          <source src="https://player.vimeo.com/external/429720803.sd.mp4?s=9b4f5b1b4a7f0e6f1b3ff2c9a6f8b3d1&profile_id=164" type="video/mp4">
+          <!-- fallback image -->
+          <img src="https://images.unsplash.com/photo-1558611848-73f7eb4001d5?q=80&w=1400&auto=format&fit=crop" alt="Gym video fallback">
+        </video>
+      </div>
+
+      <div class="relative max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center min-h-[64vh]">
+        <div class="text-white space-y-4">
+          <div class="inline-block px-3 py-1 rounded-full bg-black/30 text-sm font-medium">Local Gym • Premium Supplements</div>
+          <h1 class="text-3xl md:text-5xl font-display font-extrabold leading-tight">Train Hard. Recover Smart. <span class="text-ufAmber">Ultra Fitness</span></h1>
+          <p class="max-w-xl text-gray-100">Certified trainers, modern equipment and a curated supplement shop. Start with a 7-day trial and get a free nutrition consult.</p>
+
+          <div class="flex gap-3 mt-3">
+            <a href="#plans" class="inline-flex items-center gap-2 px-5 py-3 rounded-full text-white bg-gradient-to-r from-ufTeal to-ufAmber shadow-lg">Join Now</a>
+            <a href="#supplements" class="inline-flex items-center gap-2 px-5 py-3 rounded-full text-ufDark bg-white/90">Shop Supplements</a>
+          </div>
+
+          <div class="mt-6 flex gap-3 text-sm text-white/90">
+            <div><strong>Open:</strong> 6 AM - 10 PM</div>
+            <div>|</div>
+            <div><strong>Address:</strong> Rajdhani Marg, Kanpur</div>
+          </div>
+
+          <!-- animated counters -->
+          <div class="mt-6 flex gap-6">
+            <div class="bg-white/8 p-3 rounded-lg glass">
+              <div class="text-2xl font-bold counter" data-target="1200">0</div>
+              <div class="text-xs text-white/80">Members Trained</div>
+            </div>
+            <div class="bg-white/8 p-3 rounded-lg glass">
+              <div class="text-2xl font-bold counter" data-target="3500">0</div>
+              <div class="text-xs text-white/80">Supplements Sold</div>
+            </div>
+            <div class="bg-white/8 p-3 rounded-lg glass">
+              <div class="text-2xl font-bold counter" data-target="15">0</div>
+              <div class="text-xs text-white/80">Certified Coaches</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <!-- product card demo (glass) -->
+          <div class="absolute -top-6 right-0 w-full md:w-[380px] card-3d glass p-5 rounded-xl shadow-xl border border-white/6">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-white/80">Featured Pack</div>
+                <div class="text-lg font-semibold">Starter Protein Stack</div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold">₹2,199</div>
+                <div class="text-xs text-white/80">Limited Offer</div>
+              </div>
+            </div>
+            <div class="mt-3">
+              <p class="text-sm text-white/80">2kg Whey + Pre-workout (30 serves) — perfect for beginners.</p>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <a href="#supplements" class="px-4 py-2 rounded-full bg-white/90 text-ufDark">View</a>
+              <a id="waHeroBuy" class="px-3 py-2 rounded-full bg-ufAmber text-white" href="#" target="_blank">Buy via WhatsApp</a>
+            </div>
+            <div class="mt-3 text-xs text-white/70">Free pickup from store or doorstep delivery (local).</div>
+          </div>
+
+          <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=900&auto=format&fit=crop" alt="gym preview" class="rounded-xl shadow-2xl w-full h-[420px] object-cover">
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="max-w-6xl mx-auto p-6 -mt-10 relative z-10">
+      <div class="grid md:grid-cols-2 gap-6 items-center">
+        <div class="space-y-3">
+          <span class="mini-badge text-sm">About Us</span>
+          <h2 class="text-2xl font-semibold">Community-focused gym with a curated supplement shop</h2>
+          <p class="text-gray-700">Ultra Fitness combines full-service gym experience and an authentic supplement store. Whether your goal is strength, fat loss or health, our trainers and products will support your journey.</p>
+          <ul class="list-disc pl-5 text-gray-700">
+            <li>Personalized training plans</li>
+            <li>Verified supplements with authenticity guarantee</li>
+            <li>Flexible membership plans & monthly challenges</li>
+          </ul>
+        </div>
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-4 glass rounded-lg">
+              <div class="text-sm text-gray-700">Special Offer</div>
+              <div class="font-semibold">7-Day Trial — ₹99</div>
+            </div>
+            <div class="p-4 glass rounded-lg">
+              <div class="text-sm text-gray-700">Store Offer</div>
+              <div class="font-semibold">Buy 2 get 1 (Protein)</div>
+            </div>
+          </div>
+          <div class="p-4 rounded-lg bg-gradient-to-r from-ufTeal/7 to-ufAmber/6">
+            <div class="text-sm text-gray-700">Daily AI Tip</div>
+            <div class="font-semibold">"Hydrate strategically — drink 250-300ml water 20 minutes before workout for optimal performance."</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FACILITIES -->
+    <section id="facilities" class="max-w-6xl mx-auto p-6">
+      <h3 class="text-xl font-semibold mb-4">Facilities & Classes</h3>
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="p-5 bg-white rounded-lg shadow card-3d">
+          <div class="text-lg font-semibold">Strength Training</div>
+          <p class="text-sm text-gray-600 mt-2">Free weights, squat racks and personalized strength programs.</p>
+        </div>
+        <div class="p-5 bg-white rounded-lg shadow card-3d">
+          <div class="text-lg font-semibold">Group Classes</div>
+          <p class="text-sm text-gray-600 mt-2">HIIT, Yoga, Zumba and Bootcamps with community coaching.</p>
+        </div>
+        <div class="p-5 bg-white rounded-lg shadow card-3d">
+          <div class="text-lg font-semibold">Cardio & Recovery</div>
+          <p class="text-sm text-gray-600 mt-2">Modern cardio machines and dedicated recovery zone.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINERS -->
+    <section id="trainers" class="bg-gray-50 py-8">
+      <div class="max-w-6xl mx-auto p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Our Trainers</h3>
+          <a href="#contact" class="text-sm text-ufTeal">Book a consult</a>
+        </div>
+        <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <!-- trainer card -->
+          <div class="p-4 bg-white rounded-lg shadow text-center">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" class="w-24 h-24 rounded-full mx-auto object-cover" alt="trainer">
+            <div class="mt-3 font-semibold">Aman Kumar</div>
+            <div class="text-sm text-gray-600">Strength Coach</div>
+          </div>
+          <div class="p-4 bg-white rounded-lg shadow text-center">
+            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop" class="w-24 h-24 rounded-full mx-auto object-cover" alt="trainer">
+            <div class="mt-3 font-semibold">Priya Singh</div>
+            <div class="text-sm text-gray-600">Yoga & Mobility</div>
+          </div>
+          <div class="p-4 bg-white rounded-lg shadow text-center">
+            <img src="https://images.unsplash.com/photo-1531123414780-f821b35a0d66?q=80&w=400&auto=format&fit=crop" class="w-24 h-24 rounded-full mx-auto object-cover" alt="trainer">
+            <div class="mt-3 font-semibold">Rahul Verma</div>
+            <div class="text-sm text-gray-600">Cardio Specialist</div>
+          </div>
+          <div class="p-4 bg-white rounded-lg shadow text-center">
+            <img src="https://images.unsplash.com/photo-1548932810-5c5c3b4f0f17?q=80&w=400&auto=format&fit=crop" class="w-24 h-24 rounded-full mx-auto object-cover" alt="trainer">
+            <div class="mt-3 font-semibold">Neha Gupta</div>
+            <div class="text-sm text-gray-600">Nutrition Coach</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANS -->
+    <section id="plans" class="max-w-6xl mx-auto p-6">
+      <h3 class="text-xl font-semibold mb-4">Membership Plans</h3>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="p-6 bg-white rounded-lg shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-600">Monthly</div>
+              <div class="text-2xl font-bold">₹999</div>
+            </div>
+            <div class="text-sm">Auto-renew</div>
+          </div>
+          <ul class="mt-4 text-sm text-gray-600 list-disc pl-5">
+            <li>Access all equipment</li>
+            <li>1 free PT session</li>
+          </ul>
+          <a href="#contact" class="mt-4 inline-block px-4 py-2 rounded-full bg-ufTeal text-white">Join</a>
+        </div>
+
+        <div class="p-6 bg-white rounded-lg shadow border-2 border-ufAmber">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-600">Quarterly</div>
+              <div class="text-2xl font-bold">₹2,499</div>
+            </div>
+            <div class="text-sm text-ufAmber font-semibold">Popular</div>
+          </div>
+          <ul class="mt-4 text-sm text-gray-600 list-disc pl-5">
+            <li>Best value</li>
+            <li>2 free PT sessions</li>
+          </ul>
+          <a href="#contact" class="mt-4 inline-block px-4 py-2 rounded-full bg-ufAmber text-white">Join</a>
+        </div>
+
+        <div class="p-6 bg-white rounded-lg shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-600">Yearly</div>
+              <div class="text-2xl font-bold">₹7,999</div>
+            </div>
+            <div class="text-sm text-gray-600">Save 15%</div>
+          </div>
+          <ul class="mt-4 text-sm text-gray-600 list-disc pl-5">
+            <li>Priority support</li>
+            <li>Free supplement trial</li>
+          </ul>
+          <a href="#contact" class="mt-4 inline-block px-4 py-2 rounded-full bg-ufTeal text-white">Join</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUPPLEMENTS STORE -->
+    <section id="supplements" class="bg-gray-50 py-8">
+      <div class="max-w-6xl mx-auto p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Supplement Store</h3>
+          <a href="#contact" class="text-sm text-ufTeal">Request bulk quote</a>
+        </div>
+
+        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+          <!-- product -->
+          <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <img src="https://images.unsplash.com/photo-1599933691860-6d7f2d1b4e10?q=80&w=800&auto=format&fit=crop" alt="Protein" class="w-full h-40 object-cover rounded">
+            <div class="mt-3 flex-1">
+              <div class="font-semibold">Whey Protein 2kg</div>
+              <div class="text-sm text-gray-600">High-quality whey isolate & concentrate</div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="text-lg font-bold">₹2,499</div>
+              <div class="flex items-center gap-2">
+                <input class="w-16 p-1 border rounded text-sm" type="number" min="1" value="1" data-sku="whey-2kg">
+                <button class="px-3 py-2 rounded-full bg-ufAmber text-white buyBtn" data-title="Whey Protein 2kg" data-price="2499">Buy</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <img src="https://images.unsplash.com/photo-1596811885549-3a0d7b9b0c2f?q=80&w=800&auto=format&fit=crop" alt="Creatine" class="w-full h-40 object-cover rounded">
+            <div class="mt-3 flex-1">
+              <div class="font-semibold">Creatine Monohydrate</div>
+              <div class="text-sm text-gray-600">Micronized creatine for strength</div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="text-lg font-bold">₹799</div>
+              <div class="flex items-center gap-2">
+                <input class="w-16 p-1 border rounded text-sm" type="number" min="1" value="1" data-sku="creatine-300g">
+                <button class="px-3 py-2 rounded-full bg-ufAmber text-white buyBtn" data-title="Creatine Monohydrate" data-price="799">Buy</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <img src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?q=80&w=800&auto=format&fit=crop" alt="Preworkout" class="w-full h-40 object-cover rounded">
+            <div class="mt-3 flex-1">
+              <div class="font-semibold">Pre-workout</div>
+              <div class="text-sm text-gray-600">Energy + focus preworkout</div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="text-lg font-bold">₹899</div>
+              <div class="flex items-center gap-2">
+                <input class="w-16 p-1 border rounded text-sm" type="number" min="1" value="1" data-sku="pre-300g">
+                <button class="px-3 py-2 rounded-full bg-ufAmber text-white buyBtn" data-title="Pre-workout" data-price="899">Buy</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <img src="https://images.unsplash.com/photo-1613145992038-6a3b1e40f4a4?q=80&w=800&auto=format&fit=crop" alt="BCAA" class="w-full h-40 object-cover rounded">
+            <div class="mt-3 flex-1">
+              <div class="font-semibold">BCAA</div>
+              <div class="text-sm text-gray-600">Amino acids for recovery</div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="text-lg font-bold">₹599</div>
+              <div class="flex items-center gap-2">
+                <input class="w-16 p-1 border rounded text-sm" type="number" min="1" value="1" data-sku="bcaa-200g">
+                <button class="px-3 py-2 rounded-full bg-ufAmber text-white buyBtn" data-title="BCAA" data-price="599">Buy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- duplicate placeholders to fill layout -->
+          <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <img src="https://images.unsplash.com/photo-1582719478274-6b8b8c8b9b8a?q=80&w=800&auto=format&fit=crop" alt="Vitamin" class="w-full h-40 object-cover rounded">
+            <div class="mt-3 flex-1">
+              <div class="font-semibold">Multivitamin</div>
+              <div class="text-sm text-gray-600">Daily health support</div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="text-lg font-bold">₹399</div>
+              <div class="flex items-center gap-2">
+                <input class="w-16 p-1 border rounded text-sm" type="number" min="1" value="1" data-sku="multi-60">
+                <button class="px-3 py-2 rounded-full bg-ufAmber text-white buyBtn" data-title="Multivitamin" data-price="399">Buy</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+            <img src="https://images.unsplash.com/photo-1542831371-d531d36971e6?q=80&w=800&auto=format&fit=crop" alt="Omega" class="w-full h-40 object-cover rounded">
+            <div class="mt-3 flex-1">
+              <div class="font-semibold">Omega 3</div>
+              <div class="text-sm text-gray-600">Healthy fats for recovery</div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="text-lg font-bold">₹499</div>
+              <div class="flex items-center gap-2">
+                <input class="w-16 p-1 border rounded text-sm" type="number" min="1" value="1" data-sku="omega-60">
+                <button class="px-3 py-2 rounded-full bg-ufAmber text-white buyBtn" data-title="Omega 3" data-price="499">Buy</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials" class="max-w-6xl mx-auto p-6">
+      <h3 class="text-xl font-semibold">What Members Say</h3>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <div class="p-4 bg-white rounded-lg shadow">
+          <p class="text-gray-700">"Great coaches and a supportive environment. My strength improved in 2 months."</p>
+          <div class="mt-3 font-semibold">— Rajesh</div>
+        </div>
+        <div class="p-4 bg-white rounded-lg shadow">
+          <p class="text-gray-700">"Quality supplements and honest advice. The store staff helped me pick the right stack."</p>
+          <div class="mt-3 font-semibold">— Sneha</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Insta Reels Carousel/Snap Section -->
+<section id="reels" class="max-w-6xl mx-auto p-6 bg-gray-100 rounded-lg my-6">
+  <h3 class="text-xl font-semibold mb-4">Latest Insta Reels</h3>
+  <div class="relative">
+    <div class="flex overflow-x-auto gap-6 pb-2 snap-x snap-mandatory"
+      style="scroll-behavior: smooth;">
+      
+      <!-- Reel 1 -->
+      <div class="min-w-[90vw] md:min-w-[32vw] lg:min-w-[32vw] snap-start shrink-0 bg-white rounded-lg shadow p-4">
+        <iframe 
+          src="https://www.instagram.com/p/DM5h-Z_S1aL/" 
+          width="100%" height="480" frameborder="0" 
+          allowfullscreen scrolling="no"
+          allow="autoplay; encrypted-media"
+          style="border-radius:12px;">
+        </iframe>
+        <div class="mt-3 text-sm text-gray-700">Reel 1: Gym Transformation</div>
+      </div>
+      
+      <!-- Reel 2 -->
+      <div class="min-w-[90vw] md:min-w-[32vw] lg:min-w-[32vw] snap-start shrink-0 bg-white rounded-lg shadow p-4">
+        <iframe
+          src="https://www.instagram.com/reel/CR2xyzABCpQ/embed" 
+          width="100%" height="480" frameborder="0" 
+          allowfullscreen scrolling="no"
+          allow="autoplay; encrypted-media"
+          style="border-radius:12px;">
+        </iframe>
+        <div class="mt-3 text-sm text-gray-700">Reel 2: HIIT Workout</div>
+      </div>
+
+      <!-- Reel 3 -->
+      <div class="min-w-[90vw] md:min-w-[32vw] lg:min-w-[32vw] snap-start shrink-0 bg-white rounded-lg shadow p-4">
+        <iframe
+          src="https://www.instagram.com/reel/CR3pqrLMNO5/embed" 
+          width="100%" height="480" frameborder="0" 
+          allowfullscreen scrolling="no"
+          allow="autoplay; encrypted-media"
+          style="border-radius:12px;">
+        </iframe>
+        <div class="mt-3 text-sm text-gray-700">Reel 3: Member Reviews</div>
+      </div>
+
+      <!-- More Reels -->
+      <div class="min-w-[90vw] md:min-w-[32vw] lg:min-w-[32vw] snap-start shrink-0 bg-white rounded-lg shadow p-4">
+        <iframe
+          src="https://www.instagram.com/reel/CR4mnopQRSf/embed" 
+          width="100%" height="480" frameborder="0" 
+          allowfullscreen scrolling="no"
+          allow="autoplay; encrypted-media"
+          style="border-radius:12px;">
+        </iframe>
+        <div class="mt-3 text-sm text-gray-700">Reel 4: Zumba Crowd</div>
+      </div>
+      <!-- जितने चाहें add कर सकते हैं -->
+    </div>
+  </div>
+</section>
+
+
+    <!-- GALLERY -->
+    <section id="gallery" class="bg-white py-8">
+      <div class="max-w-6xl mx-auto p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-semibold">Gallery</h3>
+          <a href="https://www.instagram.com/ultra_fitness_gyms/" target="_blank" class="text-ufTeal text-sm">View on Instagram</a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          <img class="w-full h-40 object-cover rounded cursor-pointer galleryImg" src="https://images.unsplash.com/photo-1554284126-aa88f22d8d22?q=80&w=800&auto=format&fit=crop" alt="">
+          <img class="w-full h-40 object-cover rounded cursor-pointer galleryImg" src="https://images.unsplash.com/photo-1558611848-73f7eb4001d5?q=80&w=800&auto=format&fit=crop" alt="">
+          <img class="w-full h-40 object-cover rounded cursor-pointer galleryImg" src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800&auto=format&fit=crop" alt="">
+          <img class="w-full h-40 object-cover rounded cursor-pointer galleryImg" src="https://images.unsplash.com/photo-1583454110559-21d0b8fd7f7c?q=80&w=800&auto=format&fit=crop" alt="">
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="bg-ufAmber/6 py-8">
+      <div class="max-w-6xl mx-auto p-6 grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="text-xl font-semibold">Get in touch</h3>
+          <p class="text-gray-700">Fill the form and we'll contact you. For instant response, message on WhatsApp.</p>
+
+          <form id="contactForm" class="mt-4 bg-white p-4 rounded-lg shadow">
+            <label class="block text-sm text-gray-700">Name</label>
+            <input id="cname" class="w-full p-2 border rounded mt-1" required>
+            <label class="block text-sm text-gray-700 mt-2">Phone</label>
+            <input id="cphone" class="w-full p-2 border rounded mt-1" required>
+            <label class="block text-sm text-gray-700 mt-2">Message</label>
+            <textarea id="cmsg" class="w-full p-2 border rounded mt-1" rows="4"></textarea>
+            <div class="mt-3 flex gap-3">
+              <button type="submit" class="px-4 py-2 bg-ufTeal text-white rounded-full">Send Enquiry</button>
+              <a id="waContact" class="px-4 py-2 bg-white rounded-full text-ufDark" href="#" target="_blank">Message on WhatsApp</a>
+            </div>
+            <div id="cfMsg" class="mt-3 text-sm text-green-600 hide">Thanks — we'll contact you soon (demo).</div>
+          </form>
+        </div>
+
+        <div>
+          <h4 class="font-semibold">Location & Hours</h4>
+          <div class="mt-3 w-full h-64 bg-white rounded shadow overflow-hidden">
+            <!-- Replace src below with real Google Maps embed link -->
+            <iframe id="mapEmbed" class="w-full h-full" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.123456789012!2d80.0!3d26.45!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c0a0!2sExample%20Location!5e0!3m2!1sen!2sin!4v0000000000" frameborder="0" style="border:0" allowfullscreen="" loading="lazy"></iframe>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+            Rajdhani Marg, Kanpur<br/>
+            Open: Mon–Sun 6 AM – 10 PM
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-gray-200 py-6">
+      <div class="max-w-6xl mx-auto p-4 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div>© Ultra Fitness — Demo</div>
+        <div class="flex gap-3">
+          <a href="#" class="text-sm">Privacy</a>
+          <a href="#" class="text-sm">Terms</a>
+          <a href="#contact" class="text-sm">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- LIGHTBOX / MODAL -->
+  <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center lightbox-bg p-6">
+    <div class="max-w-4xl w-full relative">
+      <button id="lightClose" class="absolute top-3 right-3 bg-white/20 text-white rounded-full p-2">✕</button>
+      <img id="lightImg" src="" alt="Gallery" class="w-full rounded-lg shadow-xl object-contain">
+    </div>
+  </div>
+
+  <!-- CHATBOT STUB -->
+  <div id="chatBot" class="fixed right-6 bottom-20 w-80 bg-white rounded-lg shadow-lg overflow-hidden hide z-50">
+    <div class="p-3 bg-ufTeal text-white flex items-center justify-between">
+      <div class="font-semibold">UltraBot</div>
+      <button id="botClose" class="text-white/90">✕</button>
+    </div>
+    <div id="botBody" class="p-3 h-40 overflow-auto text-sm text-gray-700">Hi! Need help? (Demo bot). For real AI connect to OpenAI and configure API in backend.</div>
+    <div class="p-3 border-t">
+      <input id="botInput" class="w-full p-2 border rounded" placeholder="Type a question... (demo)" />
+    </div>
+  </div>
+
+  <!-- WHATSAPP FLOAT BUTTON -->
+  <a id="waFloat" class="fixed z-50 right-5 bottom-5" href="#" target="_blank" aria-label="WhatsApp">
+    <div class="bg-gradient-to-r from-ufTeal to-ufAmber p-3 rounded-full shadow-lg text-white flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5..."/></svg>
+      <span class="hidden md:inline-block font-medium">WhatsApp</span>
+    </div>
+  </a>
+
+  <!-- README in comment for devs -->
+  <!--
+    Dev Notes:
+    - setWhatsApp(number) to update WhatsApp header and floating links.
+    - buyBtn buttons create a prefixed WhatsApp message with product name, qty and price.
+    - To integrate a real chatbot: replace chatbot stub with OpenAI WebSocket / REST connector and secure the key on server.
+    - To enable email/contact backend: send form data to a server endpoint or use services (Formspree, Getform).
+  -->
+
+  <script>
+    /***********************
+     * Config (Replace these)
+     ***********************/
+    const MAP_EMBED_SRC = document.getElementById('mapEmbed').src; // replace in DOM directly if needed
+    function setWhatsApp(number){
+      const msgHero = encodeURIComponent('Hi, I am interested in Ultra Fitness and want to know more.');
+      const waHeader = document.getElementById('whatsappHeader');
+      const waFloat = document.getElementById('waFloat');
+      const waHeroBuy = document.getElementById('waHeroBuy');
+      const waContact = document.getElementById('waContact');
+      if(waHeader) waHeader.href = `https://wa.me/${number}?text=${msgHero}`;
+      if(waFloat) waFloat.href = `https://wa.me/${number}?text=${msgHero}`;
+      if(waHeroBuy) waHeroBuy.href = `https://wa.me/${number}?text=${encodeURIComponent('I want to buy the Starter Protein Stack.')}`;
+      if(waContact) waContact.href = `https://wa.me/${number}?text=${msgHero}`;
+      // also set other dynamic buy actions will use this base
+      window.__WHATSAPP_NUMBER = number;
+    }
+    // Demo number: replace with actual (format: 91XXXXXXXXXX)
+    setWhatsApp('919876543210');
+
+    /***********************
+     * Mobile nav toggle
+     ***********************/
+    const menuBtn = document.getElementById('menuToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    menuBtn.addEventListener('click', ()=> mobileNav.classList.toggle('hidden'));
+
+    /***********************
+     * Counters animation
+     ***********************/
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(c => {
+      const target = +c.dataset.target;
+      let current = 0;
+      const step = Math.ceil(target / 120);
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            const timer = setInterval(()=> {
+              current += step;
+              if(current >= target){ c.textContent = target; clearInterval(timer); }
+              else c.textContent = current;
+            }, 14);
+            io.unobserve(c);
+          }
+        });
+      }, {threshold: 0.3});
+      io.observe(c);
+    });
+
+    /***********************
+     * Lightbox for gallery
+     ***********************/
+    const galleryImgs = document.querySelectorAll('.galleryImg');
+    const lightbox = document.getElementById('lightbox');
+    const lightImg = document.getElementById('lightImg');
+    const lightClose = document.getElementById('lightClose');
+    galleryImgs.forEach(img => {
+      img.addEventListener('click', ()=> {
+        lightImg.src = img.src;
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+      });
+    });
+    lightClose.addEventListener('click', ()=> lightbox.classList.add('hidden'));
+
+    /***********************
+     * Buy via WhatsApp (supplements)
+     ***********************/
+    const buyButtons = document.querySelectorAll('.buyBtn');
+    buyButtons.forEach(btn => btn.addEventListener('click', (e) => {
+      const parent = e.target.closest('[data-title]') || e.target.closest('.bg-white');
+      const title = btn.dataset.title || parent?.querySelector('.font-semibold')?.textContent || 'Product';
+      const price = btn.dataset.price || parent?.querySelector('.text-lg')?.textContent || '';
+      const qtyInput = btn.parentElement.querySelector('input[type="number"]') || document.querySelector(`input[data-sku="${btn.dataset.sku}"]`);
+      const qty = qtyInput ? qtyInput.value : 1;
+      // assemble message
+      let base = `Hi, I want to order *${title}* (Qty: ${qty})`;
+      if(price) base += ` — Price: ₹${price}`;
+      const number = window.__WHATSAPP_NUMBER || '919876543210';
+      const encoded = encodeURIComponent(base);
+      window.open(`https://wa.me/${number}?text=${encoded}`, '_blank');
+    }));
+
+    /***********************
+     * Contact form (demo)
+     ***********************/
+    const cf = document.getElementById('contactForm');
+    const cfMsg = document.getElementById('cfMsg');
+    cf.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // show demo success
+      cfMsg.classList.remove('hide');
+      setTimeout(()=> cfMsg.classList.add('hide'), 3500);
+      cf.reset();
+    });
+
+    /***********************
+     * Chatbot stub toggle
+     ***********************/
+    const chatBot = document.getElementById('chatBot');
+    function openBot(){ chatBot.classList.remove('hide'); }
+    function closeBot(){ chatBot.classList.add('hide'); }
+    document.getElementById('botClose').addEventListener('click', closeBot);
+    // open bot on double-click of hero product card for demo
+    document.querySelectorAll('.card-3d').forEach(c => c.addEventListener('dblclick', openBot));
+
+    /***********************
+     * Smooth reveal on scroll (basic)
+     ***********************/
+    const revealables = document.querySelectorAll('section, .card-3d, .buyBtn');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) entry.target.classList.add('animate-fade-in');
+      });
+    }, {threshold: 0.12});
+    revealables.forEach(r => revealObserver.observe(r));
+
+    /***********************
+     * Quick helper: replace map src with provided embed if desired:
+     * document.getElementById('mapEmbed').src = 'YOUR_GOOGLE_MAP_EMBED_SRC';
+     ***********************/
+  </script>
+
+  <!-- tiny accessible CSS animation via Tailwind plugin classes fallback -->
+  <style>
+    @keyframes tinyFade { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none; } }
+    .animate-fade-in { animation: tinyFade .6s ease forwards; }
+  </style>
+</body>
+</html>
